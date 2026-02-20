@@ -1,0 +1,141 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  2206                                  |
+|   \\  /    A nd           | Website:  www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    arch        "LSB;label=32;scalar=64";
+    class       volScalarField;
+    location    "0";
+    object      T;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+dimensions      [0 0 0 1 0 0 0];
+
+internalField   uniform 350;
+
+boundaryField
+{
+    TOP
+    {
+    type            codedMixed;
+    value           uniform 300;  
+
+    refValue        uniform 0;
+    refGradient     uniform 0;
+    valueFraction   uniform 0;     // IMPORTANT: 0 => pure gradient (Neumann)
+
+    name            heatFluxWall;
+
+    code
+    #{
+        const scalar q0 = -50000.0; // W/m2
+
+        const fvPatch& patch = this->patch();
+
+        // Read k on the patch (boundary-field values of volScalarField k)
+        const scalarField& kp =
+            patch.lookupPatchField<volScalarField, scalar>("k");
+
+        scalarField& vf = valueFraction();
+        scalarField& rg = refGrad();
+        scalarField& rv = refValue();
+
+        forAll(vf, faceI)
+        {
+            const scalar kFace = max(kp[faceI], scalar(SMALL));
+
+            vf[faceI] = 0.0;           // enforce gradient form
+            rv[faceI] = 0.0;           // not used when vf=0
+            rg[faceI] = -q0 / kFace;   // dT/dn = -q/k
+        }
+    #};
+
+    }
+
+    WATER
+    {
+	        type            codedMixed;
+    		value           uniform 333;
+
+    // Required placeholders
+    refValue        uniform 0;
+    refGradient     uniform 0;
+    valueFraction   uniform 1;
+
+    name	    convectiveWall;
+
+    code
+    #{
+        const scalar h    = 1e5;      // W/m2/K
+        const scalar Tinf = 333;   // K
+
+        // Access patch values
+        const fvPatch& patch = this->patch();
+        const scalarField& k = patch.lookupPatchField<volScalarField, scalar>("k");
+        const scalarField& delta = patch.deltaCoeffs();
+
+        scalarField& vf = valueFraction();
+        scalarField& rv = refValue();
+        scalarField& rg = refGrad();
+
+        forAll(vf, faceI)
+        {
+            const scalar kDelta = k[faceI] * delta[faceI];
+            vf[faceI] = h / (h + kDelta);     // f = h / (h + k/Δ)
+            rv[faceI] = Tinf;                // ambient temperature
+            rg[faceI] = 0.0;                 // gradient unused
+        }
+    #};
+    }
+
+    AIR
+    {
+	        type            codedMixed;
+    		value           uniform 333;
+
+    // Required placeholders
+    refValue        uniform 0;
+    refGradient     uniform 0;
+    valueFraction   uniform 1;
+
+    name	    convectiveWall;
+
+    code
+    #{
+        const scalar h    = 10;      // W/m2/K
+        const scalar Tinf = 293;     // K
+
+        // Access patch values
+        const fvPatch& patch = this->patch();
+        const scalarField& k = patch.lookupPatchField<volScalarField, scalar>("k");
+        const scalarField& delta = patch.deltaCoeffs();
+
+        scalarField& vf = valueFraction();
+        scalarField& rv = refValue();
+        scalarField& rg = refGrad();
+
+        forAll(vf, faceI)
+        {
+            const scalar kDelta = k[faceI] * delta[faceI];
+            vf[faceI] = h / (h + kDelta);     // f = h / (h + k/Δ)
+            rv[faceI] = Tinf;                // ambient temperature
+            rg[faceI] = 0.0;                 // gradient unused
+        }
+    #};
+    }
+
+    FRONT_BACK
+    {
+        type            empty;
+    }
+}
+
+
+// ************************************************************************* //
