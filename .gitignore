@@ -1,0 +1,17 @@
+# results
+[0-9]*/
+postProcessing/
+processor*/
+dynamicCode/
+log*
+*.log
+*.foam
+# mesh
+constant/polyMesh/
+*.msh
+# editor junk
+*~
+*.swp
+*.swo
+.DS_Store
+.vscode/

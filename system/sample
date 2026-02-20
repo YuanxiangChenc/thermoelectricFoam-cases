@@ -1,0 +1,58 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  2.1.x                                 |
+|   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+	version	2.0;
+	format	ascii;
+	class	dictionary;
+	object	sample;
+}
+//*****************************************************************
+type            sets;
+libs            ("libsampling.so");
+interpolationScheme cellPoint;  
+setFormat       raw;        
+
+fields          (T k gradT gradTx gradTy gradTz q );
+// fields	(kEff); 		can't sample surface scalarFieldimport numpy as np
+sets
+(
+    topConductor
+    {
+	type 	uniform;
+	axis	distance;
+	
+	start       (-0.08026 0.01059 0.02);
+        end         (0.08026 0.01059 0.02);
+        nPoints     80;
+    }
+
+    topSeebeck
+    {
+	type 	uniform;
+	axis	distance;
+	
+	start       (-0.020065 0.0033535 0.02);		//first cell 0.0033535
+        end         (0.020065 0.0033535 0.02);
+        nPoints     80;
+    }
+
+    btmSeebeck
+    {
+	type 	uniform;
+	axis	distance;
+	
+	start       (-0.020065 0.0 0.02);		//first cell 0.0033535
+        end         (0.020065 0.0 0.02);
+        nPoints     80;
+    }
+
+
+
+
+);

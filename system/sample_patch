@@ -1,0 +1,48 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  2.1.x                                 |
+|   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+	version	2.0;
+	format	ascii;
+	class	dictionary;
+	object	sample;
+}
+
+//*************************************************************************** //
+type                surfaces;
+libs                ("libsampling.so");
+
+surfaceFormat       raw;
+interpolationScheme face;     // key change
+
+fields              (qn magSf);
+
+surfaces
+(
+    TOP
+    {
+        type        patch;
+        patches     (TOP);
+        interpolate false;
+    }
+
+    WATER
+    {
+        type        patch;
+        patches     (WATER);
+        interpolate false;
+    }
+
+    AIR
+    {
+        type        patch;
+        patches     (AIR);
+        interpolate false;
+    }
+);
+

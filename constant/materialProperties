@@ -1,0 +1,58 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  v2206                                 |
+|   \\  /    A nd           | Website:  www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      materialProperties;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+materials
+{
+    seebeckcell
+    {
+        type thermoelectric;
+        a0 -0.06372;
+        r0 1.137;
+        k0 1.8735;
+        Tm 383;
+
+        A1 1.96e-3; A2 3.25e-6;
+        B1 3.88e-3; B2 3.33e-6;
+        C1 1.76e-4; C2 3.36e-5;
+
+        j (0 840 0);
+	dTLimit 120;  //limit phi(dT) 
+    }
+
+    insulator
+    {
+        type solid;
+        k 0.5;
+    }
+
+    conductor
+    {
+        type solid;
+        k 400;
+    }
+
+    dissipador
+    {
+        type solid;
+        k 400;
+    }
+
+
+
+}
+
+
+// ************************************************************************* //

@@ -1,0 +1,701 @@
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      blockMeshDict;
+}
+
+scale 1;
+
+//------------------------------- Geometry -------------------------------
+Ls 0.04013;   // seebeckcell length in x
+Ws 0.04013;   // depth in z
+Hs 0.00353;   // half-layer height reference in y
+xd 0.001;     // fin thickness (x)
+
+pl 4;
+hl 3;
+yl 2;
+
+xsb  #calc "$Ls*0.5";          // x in [-xsb, +xsb]
+xmin #calc "$Ls*$pl*0.5";      // outer top half-length
+ycd  #calc "$Hs*$hl";          // top y
+ymin #calc "$Hs*$yl";          // bottom magnitude (y=-ymin)
+
+//------------------------------- Fin centres (7 fins) -------------------
+cf3l #calc "-$xsb*3/4";
+cf2l #calc "-$xsb*2/4";
+cf1l #calc "-$xsb*1/4";
+cf0  #calc "0";
+cf1r #calc  "$xsb*1/4";
+cf2r #calc  "$xsb*2/4";
+cf3r #calc  "$xsb*3/4";
+
+// fin edges
+lf3l #calc "$cf3l - 0.5*$xd";  rf3l #calc "$cf3l + 0.5*$xd";
+lf2l #calc "$cf2l - 0.5*$xd";  rf2l #calc "$cf2l + 0.5*$xd";
+lf1l #calc "$cf1l - 0.5*$xd";  rf1l #calc "$cf1l + 0.5*$xd";
+lf0  #calc "$cf0  - 0.5*$xd";  rf0  #calc "$cf0  + 0.5*$xd";
+lf1r #calc "$cf1r - 0.5*$xd";  rf1r #calc "$cf1r + 0.5*$xd";
+lf2r #calc "$cf2r - 0.5*$xd";  rf2r #calc "$cf2r + 0.5*$xd";
+lf3r #calc "$cf3r - 0.5*$xd";  rf3r #calc "$cf3r + 0.5*$xd";
+
+// top-mapped x (at y=ycd): precompute (NO inline arithmetic in vertices)
+lf3l_t #calc "$lf3l*$pl";  rf3l_t #calc "$rf3l*$pl";
+lf2l_t #calc "$lf2l*$pl";  rf2l_t #calc "$rf2l*$pl";
+lf1l_t #calc "$lf1l*$pl";  rf1l_t #calc "$rf1l*$pl";
+lf0_t  #calc "$lf0 *$pl";  rf0_t  #calc "$rf0 *$pl";
+lf1r_t #calc "$lf1r*$pl";  rf1r_t #calc "$rf1r*$pl";
+lf2r_t #calc "$lf2r*$pl";  rf2r_t #calc "$rf2r*$pl";
+lf3r_t #calc "$lf3r*$pl";  rf3r_t #calc "$rf3r*$pl";
+
+//------------------------------- Mesh resolution ------------------------
+Nxsb 78;    // total in seebeckcell x
+Ny   20;
+Nz   1;
+No   80;    // y-cells for outer blocks / top region
+Nf   2;     // x-cells across each fin thickness
+
+// Gap x-cells (8 gaps around 7 fins): must sum to Nxsb - 7*Nf
+Ng0 8;
+Ng1 8;
+Ng2 8;
+Ng3 8;
+Ng4 8;
+Ng5 8;
+Ng6 8;
+Ng7 8;
+
+//------------------------------- Vertices --------------------------------
+vertices
+(
+    // Base (original) corners
+    ( -$xsb  0   0   )  // 0
+    (  $xsb  0   0   )  // 1
+    (  $xsb  $Hs 0   )  // 2
+    ( -$xsb  $Hs 0   )  // 3
+
+    ( -$xmin 0   0   )  // 4
+    (  $xmin 0   0   )  // 5
+    (  $xmin $ycd 0  )  // 6
+    ( -$xmin $ycd 0  )  // 7
+
+    ( -$xsb  0   $Ws )  // 8
+    (  $xsb  0   $Ws )  // 9
+    (  $xsb  $Hs $Ws )  // 10
+    ( -$xsb  $Hs $Ws )  // 11
+
+    ( -$xmin 0   $Ws )  // 12
+    (  $xmin 0   $Ws )  // 13
+    (  $xmin $ycd $Ws ) // 14
+    ( -$xmin $ycd $Ws ) // 15
+
+    ( -$xsb  -$Hs   0   )  // 16
+    (  $xsb  -$Hs   0   )  // 17
+    (  $xmin -$Hs   0   )  // 18
+    (  $xmin -$ymin 0   )  // 19
+    (  $xsb  -$ymin 0   )  // 20
+    ( -$xsb  -$ymin 0   )  // 21
+    ( -$xmin -$ymin 0   )  // 22
+    ( -$xmin -$Hs   0   )  // 23
+
+    ( -$xsb  -$Hs   $Ws )  // 24
+    (  $xsb  -$Hs   $Ws )  // 25
+    (  $xmin -$Hs   $Ws )  // 26
+    (  $xmin -$ymin $Ws )  // 27
+    (  $xsb  -$ymin $Ws )  // 28
+    ( -$xsb  -$ymin $Ws )  // 29
+    ( -$xmin -$ymin $Ws )  // 30
+    ( -$xmin -$Hs   $Ws )  // 31
+
+    // --- x = lf3l plane (y=0, Hs, -Hs, -ymin, ycd) ---
+    ( $lf3l    0      0   )  // 32
+    ( $lf3l    0      $Ws )  // 33
+    ( $lf3l    $Hs    0   )  // 34
+    ( $lf3l    $Hs    $Ws )  // 35
+    ( $lf3l   -$Hs    0   )  // 36
+    ( $lf3l   -$Hs    $Ws )  // 37
+    ( $lf3l   -$ymin  0   )  // 38
+    ( $lf3l   -$ymin  $Ws )  // 39
+    ( $lf3l_t  $ycd   0   )  // 40
+    ( $lf3l_t  $ycd   $Ws )  // 41
+
+    // --- x = rf3l ---
+    ( $rf3l    0      0   )  // 42
+    ( $rf3l    0      $Ws )  // 43
+    ( $rf3l    $Hs    0   )  // 44
+    ( $rf3l    $Hs    $Ws )  // 45
+    ( $rf3l   -$Hs    0   )  // 46
+    ( $rf3l   -$Hs    $Ws )  // 47
+    ( $rf3l   -$ymin  0   )  // 48
+    ( $rf3l   -$ymin  $Ws )  // 49
+    ( $rf3l_t  $ycd   0   )  // 50
+    ( $rf3l_t  $ycd   $Ws )  // 51
+
+    // --- x = lf2l ---
+    ( $lf2l    0      0   )  // 52
+    ( $lf2l    0      $Ws )  // 53
+    ( $lf2l    $Hs    0   )  // 54
+    ( $lf2l    $Hs    $Ws )  // 55
+    ( $lf2l   -$Hs    0   )  // 56
+    ( $lf2l   -$Hs    $Ws )  // 57
+    ( $lf2l   -$ymin  0   )  // 58
+    ( $lf2l   -$ymin  $Ws )  // 59
+    ( $lf2l_t  $ycd   0   )  // 60
+    ( $lf2l_t  $ycd   $Ws )  // 61
+
+    // --- x = rf2l ---
+    ( $rf2l    0      0   )  // 62
+    ( $rf2l    0      $Ws )  // 63
+    ( $rf2l    $Hs    0   )  // 64
+    ( $rf2l    $Hs    $Ws )  // 65
+    ( $rf2l   -$Hs    0   )  // 66
+    ( $rf2l   -$Hs    $Ws )  // 67
+    ( $rf2l   -$ymin  0   )  // 68
+    ( $rf2l   -$ymin  $Ws )  // 69
+    ( $rf2l_t  $ycd   0   )  // 70
+    ( $rf2l_t  $ycd   $Ws )  // 71
+
+    // --- x = lf1l ---
+    ( $lf1l    0      0   )  // 72
+    ( $lf1l    0      $Ws )  // 73
+    ( $lf1l    $Hs    0   )  // 74
+    ( $lf1l    $Hs    $Ws )  // 75
+    ( $lf1l   -$Hs    0   )  // 76
+    ( $lf1l   -$Hs    $Ws )  // 77
+    ( $lf1l   -$ymin  0   )  // 78
+    ( $lf1l   -$ymin  $Ws )  // 79
+    ( $lf1l_t  $ycd   0   )  // 80
+    ( $lf1l_t  $ycd   $Ws )  // 81
+
+    // --- x = rf1l ---
+    ( $rf1l    0      0   )  // 82
+    ( $rf1l    0      $Ws )  // 83
+    ( $rf1l    $Hs    0   )  // 84
+    ( $rf1l    $Hs    $Ws )  // 85
+    ( $rf1l   -$Hs    0   )  // 86
+    ( $rf1l   -$Hs    $Ws )  // 87
+    ( $rf1l   -$ymin  0   )  // 88
+    ( $rf1l   -$ymin  $Ws )  // 89
+    ( $rf1l_t  $ycd   0   )  // 90
+    ( $rf1l_t  $ycd   $Ws )  // 91
+
+    // --- x = lf0 ---
+    ( $lf0     0      0   )  // 92
+    ( $lf0     0      $Ws )  // 93
+    ( $lf0     $Hs    0   )  // 94
+    ( $lf0     $Hs    $Ws )  // 95
+    ( $lf0    -$Hs    0   )  // 96
+    ( $lf0    -$Hs    $Ws )  // 97
+    ( $lf0    -$ymin  0   )  // 98
+    ( $lf0    -$ymin  $Ws )  // 99
+    ( $lf0_t   $ycd   0   )  // 100
+    ( $lf0_t   $ycd   $Ws )  // 101
+
+    // --- x = rf0 ---
+    ( $rf0     0      0   )  // 102
+    ( $rf0     0      $Ws )  // 103
+    ( $rf0     $Hs    0   )  // 104
+    ( $rf0     $Hs    $Ws )  // 105
+    ( $rf0    -$Hs    0   )  // 106
+    ( $rf0    -$Hs    $Ws )  // 107
+    ( $rf0    -$ymin  0   )  // 108
+    ( $rf0    -$ymin  $Ws )  // 109
+    ( $rf0_t   $ycd   0   )  // 110
+    ( $rf0_t   $ycd   $Ws )  // 111
+
+    // --- x = lf1r ---
+    ( $lf1r    0      0   )  // 112
+    ( $lf1r    0      $Ws )  // 113
+    ( $lf1r    $Hs    0   )  // 114
+    ( $lf1r    $Hs    $Ws )  // 115
+    ( $lf1r   -$Hs    0   )  // 116
+    ( $lf1r   -$Hs    $Ws )  // 117
+    ( $lf1r   -$ymin  0   )  // 118
+    ( $lf1r   -$ymin  $Ws )  // 119
+    ( $lf1r_t  $ycd   0   )  // 120
+    ( $lf1r_t  $ycd   $Ws )  // 121
+
+    // --- x = rf1r ---
+    ( $rf1r    0      0   )  // 122
+    ( $rf1r    0      $Ws )  // 123
+    ( $rf1r    $Hs    0   )  // 124
+    ( $rf1r    $Hs    $Ws )  // 125
+    ( $rf1r   -$Hs    0   )  // 126
+    ( $rf1r   -$Hs    $Ws )  // 127
+    ( $rf1r   -$ymin  0   )  // 128
+    ( $rf1r   -$ymin  $Ws )  // 129
+    ( $rf1r_t  $ycd   0   )  // 130
+    ( $rf1r_t  $ycd   $Ws )  // 131
+
+    // --- x = lf2r ---
+    ( $lf2r    0      0   )  // 132
+    ( $lf2r    0      $Ws )  // 133
+    ( $lf2r    $Hs    0   )  // 134
+    ( $lf2r    $Hs    $Ws )  // 135
+    ( $lf2r   -$Hs    0   )  // 136
+    ( $lf2r   -$Hs    $Ws )  // 137
+    ( $lf2r   -$ymin  0   )  // 138
+    ( $lf2r   -$ymin  $Ws )  // 139
+    ( $lf2r_t  $ycd   0   )  // 140
+    ( $lf2r_t  $ycd   $Ws )  // 141
+
+    // --- x = rf2r ---
+    ( $rf2r    0      0   )  // 142
+    ( $rf2r    0      $Ws )  // 143
+    ( $rf2r    $Hs    0   )  // 144
+    ( $rf2r    $Hs    $Ws )  // 145
+    ( $rf2r   -$Hs    0   )  // 146
+    ( $rf2r   -$Hs    $Ws )  // 147
+    ( $rf2r   -$ymin  0   )  // 148
+    ( $rf2r   -$ymin  $Ws )  // 149
+    ( $rf2r_t  $ycd   0   )  // 150
+    ( $rf2r_t  $ycd   $Ws )  // 151
+
+    // --- x = lf3r ---
+    ( $lf3r    0      0   )  // 152
+    ( $lf3r    0      $Ws )  // 153
+    ( $lf3r    $Hs    0   )  // 154
+    ( $lf3r    $Hs    $Ws )  // 155
+    ( $lf3r   -$Hs    0   )  // 156
+    ( $lf3r   -$Hs    $Ws )  // 157
+    ( $lf3r   -$ymin  0   )  // 158
+    ( $lf3r   -$ymin  $Ws )  // 159
+    ( $lf3r_t  $ycd   0   )  // 160
+    ( $lf3r_t  $ycd   $Ws )  // 161
+
+    // --- x = rf3r ---
+    ( $rf3r    0      0   )  // 162
+    ( $rf3r    0      $Ws )  // 163
+    ( $rf3r    $Hs    0   )  // 164
+    ( $rf3r    $Hs    $Ws )  // 165
+    ( $rf3r   -$Hs    0   )  // 166
+    ( $rf3r   -$Hs    $Ws )  // 167
+    ( $rf3r   -$ymin  0   )  // 168
+    ( $rf3r   -$ymin  $Ws )  // 169
+    ( $rf3r_t  $ycd   0   )  // 170
+    ( $rf3r_t  $ycd   $Ws )  // 171
+);
+
+//------------------------------- Blocks ----------------------------------
+blocks
+(
+    // Outer fixed blocks (unchanged)
+    hex (4 0 3 7 12 8 11 15) insulator ($No $Ny $Nz) simpleGrading (1 1 1)    // B
+    hex (1 5 6 2 9 13 14 10) insulator ($No $Ny $Nz) simpleGrading (1 1 1)    // D
+    hex (17 18 5 1 25 26 13 9) insulator ($No $Ny $Nz) simpleGrading (1 1 1)  // E
+    hex (20 19 18 17 28 27 26 25) insulator ($No $Ny $Nz) simpleGrading (1 1 1)// F
+    hex (22 21 16 23 30 29 24 31) insulator ($No $Ny $Nz) simpleGrading (1 1 1)// H
+    hex (23 16 0 4 31 24 8 12) insulator ($No $Ny $Nz) simpleGrading (1 1 1)  // I
+
+    // Slab 0: xm -> lf3l (gap)
+    hex (0 32 34 3   8 33 35 11) seebeckcell ($Ng0 $Ny $Nz) simpleGrading (1 1 1)
+    hex (3 34 40 7   11 35 41 15) conductor  ($Ng0 $No $Nz) simpleGrading (1 1 1)
+    hex (21 38 36 16 29 39 37 24) insulator  ($Ng0 $Ny $Nz) simpleGrading (1 1 1)
+
+    // Slab 1: lf3l -> rf3l (fin)
+    hex (32 42 44 34 33 43 45 35) seebeckcell ($Nf $Ny $Nz) simpleGrading (1 1 1)
+    hex (34 44 50 40 35 45 51 41) conductor  ($Nf $No $Nz) simpleGrading (1 1 1)
+    hex (38 48 46 36 39 49 47 37) insulator  ($Nf $Ny $Nz) simpleGrading (1 1 1)
+    hex (36 46 42 32 37 47 43 33) dissipador ($Nf $Ny $Nz) simpleGrading (1 1 1)
+
+    // Slab 2: rf3l -> lf2l (gap)
+    hex (42 52 54 44 43 53 55 45) seebeckcell ($Ng1 $Ny $Nz) simpleGrading (1 1 1)
+    hex (44 54 60 50 45 55 61 51) conductor  ($Ng1 $No $Nz) simpleGrading (1 1 1)
+    hex (48 58 56 46 49 59 57 47) insulator  ($Ng1 $Ny $Nz) simpleGrading (1 1 1)
+
+    // Slab 3: lf2l -> rf2l (fin)
+    hex (52 62 64 54 53 63 65 55) seebeckcell ($Nf $Ny $Nz) simpleGrading (1 1 1)
+    hex (54 64 70 60 55 65 71 61) conductor  ($Nf $No $Nz) simpleGrading (1 1 1)
+    hex (58 68 66 56 59 69 67 57) insulator  ($Nf $Ny $Nz) simpleGrading (1 1 1)
+    hex (56 66 62 52 57 67 63 53) dissipador ($Nf $Ny $Nz) simpleGrading (1 1 1)
+
+    // Slab 4: rf2l -> lf1l (gap)
+    hex (62 72 74 64 63 73 75 65) seebeckcell ($Ng2 $Ny $Nz) simpleGrading (1 1 1)
+    hex (64 74 80 70 65 75 81 71) conductor  ($Ng2 $No $Nz) simpleGrading (1 1 1)
+    hex (68 78 76 66 69 79 77 67) insulator  ($Ng2 $Ny $Nz) simpleGrading (1 1 1)
+
+    // Slab 5: lf1l -> rf1l (fin)
+    hex (72 82 84 74 73 83 85 75) seebeckcell ($Nf $Ny $Nz) simpleGrading (1 1 1)
+    hex (74 84 90 80 75 85 91 81) conductor  ($Nf $No $Nz) simpleGrading (1 1 1)
+    hex (78 88 86 76 79 89 87 77) insulator  ($Nf $Ny $Nz) simpleGrading (1 1 1)
+    hex (76 86 82 72 77 87 83 73) dissipador ($Nf $Ny $Nz) simpleGrading (1 1 1)
+
+    // Slab 6: rf1l -> lf0 (gap)
+    hex (82 92 94 84 83 93 95 85) seebeckcell ($Ng3 $Ny $Nz) simpleGrading (1 1 1)
+    hex (84 94 100 90 85 95 101 91) conductor ($Ng3 $No $Nz) simpleGrading (1 1 1)
+    hex (88 98 96 86 89 99 97 87) insulator ($Ng3 $Ny $Nz) simpleGrading (1 1 1)
+
+    // Slab 7: lf0 -> rf0 (fin)
+    hex (92 102 104 94 93 103 105 95) seebeckcell ($Nf $Ny $Nz) simpleGrading (1 1 1)
+    hex (94 104 110 100 95 105 111 101) conductor ($Nf $No $Nz) simpleGrading (1 1 1)
+    hex (98 108 106 96 99 109 107 97) insulator ($Nf $Ny $Nz) simpleGrading (1 1 1)
+    hex (96 106 102 92 97 107 103 93) dissipador ($Nf $Ny $Nz) simpleGrading (1 1 1)
+
+    // Slab 8: rf0 -> lf1r (gap)
+    hex (102 112 114 104 103 113 115 105) seebeckcell ($Ng4 $Ny $Nz) simpleGrading (1 1 1)
+    hex (104 114 120 110 105 115 121 111) conductor ($Ng4 $No $Nz) simpleGrading (1 1 1)
+    hex (108 118 116 106 109 119 117 107) insulator ($Ng4 $Ny $Nz) simpleGrading (1 1 1)
+
+    // Slab 9: lf1r -> rf1r (fin)
+    hex (112 122 124 114 113 123 125 115) seebeckcell ($Nf $Ny $Nz) simpleGrading (1 1 1)
+    hex (114 124 130 120 115 125 131 121) conductor ($Nf $No $Nz) simpleGrading (1 1 1)
+    hex (118 128 126 116 119 129 127 117) insulator ($Nf $Ny $Nz) simpleGrading (1 1 1)
+    hex (116 126 122 112 117 127 123 113) dissipador ($Nf $Ny $Nz) simpleGrading (1 1 1)
+
+    // Slab 10: rf1r -> lf2r (gap)
+    hex (122 132 134 124 123 133 135 125) seebeckcell ($Ng5 $Ny $Nz) simpleGrading (1 1 1)
+    hex (124 134 140 130 125 135 141 131) conductor ($Ng5 $No $Nz) simpleGrading (1 1 1)
+    hex (128 138 136 126 129 139 137 127) insulator ($Ng5 $Ny $Nz) simpleGrading (1 1 1)
+
+    // Slab 11: lf2r -> rf2r (fin)
+    hex (132 142 144 134 133 143 145 135) seebeckcell ($Nf $Ny $Nz) simpleGrading (1 1 1)
+    hex (134 144 150 140 135 145 151 141) conductor ($Nf $No $Nz) simpleGrading (1 1 1)
+    hex (138 148 146 136 139 149 147 137) insulator ($Nf $Ny $Nz) simpleGrading (1 1 1)
+    hex (136 146 142 132 137 147 143 133) dissipador ($Nf $Ny $Nz) simpleGrading (1 1 1)
+
+    // Slab 12: rf2r -> lf3r (gap)
+    hex (142 152 154 144 143 153 155 145) seebeckcell ($Ng6 $Ny $Nz) simpleGrading (1 1 1)
+    hex (144 154 160 150 145 155 161 151) conductor ($Ng6 $No $Nz) simpleGrading (1 1 1)
+    hex (148 158 156 146 149 159 157 147) insulator ($Ng6 $Ny $Nz) simpleGrading (1 1 1)
+
+    // Slab 13: lf3r -> rf3r (fin)
+    hex (152 162 164 154 153 163 165 155) seebeckcell ($Nf $Ny $Nz) simpleGrading (1 1 1)
+    hex (154 164 170 160 155 165 171 161) conductor ($Nf $No $Nz) simpleGrading (1 1 1)
+    hex (158 168 166 156 159 169 167 157) insulator ($Nf $Ny $Nz) simpleGrading (1 1 1)
+    hex (156 166 162 152 157 167 163 153) dissipador ($Nf $Ny $Nz) simpleGrading (1 1 1)
+
+    // Slab 14: rf3r -> +xsb (gap)
+    hex (162 1 2 164 163 9 10 165) seebeckcell ($Ng7 $Ny $Nz) simpleGrading (1 1 1)
+    hex (164 2 6 170 165 10 14 171) conductor ($Ng7 $No $Nz) simpleGrading (1 1 1)
+    hex (168 20 17 166 169 28 25 167) insulator ($Ng7 $Ny $Nz) simpleGrading (1 1 1)
+);
+
+edges
+(
+);
+
+mergePatchPairs
+(
+);
+
+// boundary intentionally omitted (user request)
+boundary
+(
+    TOP
+    {
+        type wall;
+        faces
+        (
+            // y = ycd, segmented from x=-xmin to x=+xmin
+            (7   40  41  15)
+            (40  50  51  41)
+            (50  60  61  51)
+            (60  70  71  61)
+            (70  80  81  71)
+            (80  90  91  81)
+            (90  100 101 91)
+            (100 110 111 101)
+            (110 120 121 111)
+            (120 130 131 121)
+            (130 140 141 131)
+            (140 150 151 141)
+            (150 160 161 151)
+            (160 170 171 161)
+            (170 6   14  171)
+        );
+    }
+
+    WATER
+    {
+        type wall;
+        faces
+        (
+            // side walls x = ±xsb (unchanged)
+            (0 16 24 8)
+            (1 17 25 9)
+
+            // y = 0 exposed gaps (fin top faces are internal)
+            (0   32  33  8)
+            (42  52  53  43)
+            (62  72  73  63)
+            (82  92  93  83)
+            (102 112 113 103)
+            (122 132 133 123)
+            (142 152 153 143)
+            (162 1   9   163)
+
+            // y = -Hs exposed gaps (fin bottom faces are internal)
+            (16  36  37  24)
+            (46  56  57  47)
+            (66  76  77  67)
+            (86  96  97  87)
+            (106 116 117 107)
+            (126 136 137 127)
+            (146 156 157 147)
+            (166 17  25  167)
+
+            // fin side faces: left and right face for each fin
+            // fin at (lf3l, rf3l)
+            (32  36  37  33)   // x = lf3l (outward -x)
+            (42  43  47  46)   // x = rf3l (outward +x)
+
+            // fin at (lf2l, rf2l)
+            (52  56  57  53)
+            (62  63  67  66)
+
+            // fin at (lf1l, rf1l)
+            (72  76  77  73)
+            (82  83  87  86)
+
+            // fin at (lf0, rf0)
+            (92  96  97  93)
+            (102 103 107 106)
+
+            // fin at (lf1r, rf1r)
+            (112 116 117 113)
+            (122 123 127 126)
+
+            // fin at (lf2r, rf2r)
+            (132 136 137 133)
+            (142 143 147 146)
+
+            // fin at (lf3r, rf3r)
+            (152 156 157 153)
+            (162 163 167 166)
+        );
+    }
+
+    AIR
+    {
+        type wall;
+        faces
+        (
+            // outer air walls (same as your original)
+            (5 6 14 13)
+            (4 7 15 12)
+            (5 18 26 13)
+            (18 19 27 26)
+            (20 19 27 28)
+            (22 21 29 30)
+            (22 23 31 30)
+            (23 4 12 31)
+
+            // bottom y = -ymin, segmented across x=-xsb..+xsb
+            (21  38  39  29)
+            (38  48  49  39)
+            (48  58  59  49)
+            (58  68  69  59)
+            (68  78  79  69)
+            (78  88  89  79)
+            (88  98  99  89)
+            (98  108 109 99)
+            (108 118 119 109)
+            (118 128 129 119)
+            (128 138 139 129)
+            (138 148 149 139)
+            (148 158 159 149)
+            (158 168 169 159)
+            (168 20  28  169)
+        );
+    }
+
+    FRONT_BACK
+    {
+        type empty;
+        faces
+        (
+            // Outer fixed blocks B,D,E,F,H,I
+            (4 0 3 7)
+            (12 8 11 15)
+
+            (1 5 6 2)
+            (9 13 14 10)
+
+            (17 18 5 1)
+            (25 26 13 9)
+
+            (20 19 18 17)
+            (28 27 26 25)
+
+            (22 21 16 23)
+            (30 29 24 31)
+
+            (23 16 0 4)
+            (31 24 8 12)
+
+            // Slab 0 (gap): A, C, G
+            (0 32 34 3)
+            (8 33 35 11)
+
+            (3 34 40 7)
+            (11 35 41 15)
+
+            (21 38 36 16)
+            (29 39 37 24)
+
+            // Slab 1 (fin): A, C, G, J
+            (32 42 44 34)
+            (33 43 45 35)
+
+            (34 44 50 40)
+            (35 45 51 41)
+
+            (38 48 46 36)
+            (39 49 47 37)
+
+            (36 46 42 32)
+            (37 47 43 33)
+
+            // Slab 2 (gap): A, C, G
+            (42 52 54 44)
+            (43 53 55 45)
+
+            (44 54 60 50)
+            (45 55 61 51)
+
+            (48 58 56 46)
+            (49 59 57 47)
+
+            // Slab 3 (fin): A, C, G, J
+            (52 62 64 54)
+            (53 63 65 55)
+
+            (54 64 70 60)
+            (55 65 71 61)
+
+            (58 68 66 56)
+            (59 69 67 57)
+
+            (56 66 62 52)
+            (57 67 63 53)
+
+            // Slab 4 (gap): A, C, G
+            (62 72 74 64)
+            (63 73 75 65)
+
+            (64 74 80 70)
+            (65 75 81 71)
+
+            (68 78 76 66)
+            (69 79 77 67)
+
+            // Slab 5 (fin): A, C, G, J
+            (72 82 84 74)
+            (73 83 85 75)
+
+            (74 84 90 80)
+            (75 85 91 81)
+
+            (78 88 86 76)
+            (79 89 87 77)
+
+            (76 86 82 72)
+            (77 87 83 73)
+
+            // Slab 6 (gap): A, C, G
+            (82 92 94 84)
+            (83 93 95 85)
+
+            (84 94 100 90)
+            (85 95 101 91)
+
+            (88 98 96 86)
+            (89 99 97 87)
+
+            // Slab 7 (fin): A, C, G, J
+            (92 102 104 94)
+            (93 103 105 95)
+
+            (94 104 110 100)
+            (95 105 111 101)
+
+            (98 108 106 96)
+            (99 109 107 97)
+
+            (96 106 102 92)
+            (97 107 103 93)
+
+            // Slab 8 (gap): A, C, G
+            (102 112 114 104)
+            (103 113 115 105)
+
+            (104 114 120 110)
+            (105 115 121 111)
+
+            (108 118 116 106)
+            (109 119 117 107)
+
+            // Slab 9 (fin): A, C, G, J
+            (112 122 124 114)
+            (113 123 125 115)
+
+            (114 124 130 120)
+            (115 125 131 121)
+
+            (118 128 126 116)
+            (119 129 127 117)
+
+            (116 126 122 112)
+            (117 127 123 113)
+
+            // Slab 10 (gap): A, C, G
+            (122 132 134 124)
+            (123 133 135 125)
+
+            (124 134 140 130)
+            (125 135 141 131)
+
+            (128 138 136 126)
+            (129 139 137 127)
+
+            // Slab 11 (fin): A, C, G, J
+            (132 142 144 134)
+            (133 143 145 135)
+
+            (134 144 150 140)
+            (135 145 151 141)
+
+            (138 148 146 136)
+            (139 149 147 137)
+
+            (136 146 142 132)
+            (137 147 143 133)
+
+            // Slab 12 (gap): A, C, G
+            (142 152 154 144)
+            (143 153 155 145)
+
+            (144 154 160 150)
+            (145 155 161 151)
+
+            (148 158 156 146)
+            (149 159 157 147)
+
+            // Slab 13 (fin): A, C, G, J
+            (152 162 164 154)
+            (153 163 165 155)
+
+            (154 164 170 160)
+            (155 165 171 161)
+
+            (158 168 166 156)
+            (159 169 167 157)
+
+            (156 166 162 152)
+            (157 167 163 153)
+
+            // Slab 14 (gap): A, C, G
+            (162 1 2 164)
+            (163 9 10 165)
+
+            (164 2 6 170)
+            (165 10 14 171)
+
+            (168 20 17 166)
+            (169 28 25 167)
+        );
+    }
+);
+

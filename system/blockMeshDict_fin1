@@ -1,0 +1,254 @@
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      blockMeshDict;
+}
+scale 1;
+
+//------------------------------- Geo parameters -------------------
+Ls 0.04013;   // length  (x)
+Ws 0.04013;   // width   (z)
+Hs 0.00353;   // height  (y)
+xd 0.001;	// fin thickness(x) 
+
+pl 4;
+hl 3;
+yl 2;
+
+xsb #calc "$Ls*0.5";			// side of seebeckcell
+xmin #calc "$Ls* $pl * 0.5";		// side of insulator
+ycd #calc "$Hs* $hl";			// top of conductor
+ymin #calc "$Hs * $yl";			// bottom of insulator
+
+xfl #calc "$xd * -0.5";			// left of centro fin (dissipador)
+xfr #calc "$xd * 0.5";
+xflt #calc "$xfl * $pl";
+xfrt #calc "$xfr * $pl";
+
+//------------------------------- Grid parameters -----------------
+Nxsb 80; 
+Nx 40;
+Ny 20;
+Nz 1;
+No 80;
+Nf 2;
+Nd 39;
+
+
+vertices
+(
+    ( -$xsb  0  0       )  // 0
+    ( $xsb  0  0       )  // 1
+    ( $xsb  $Hs  0       )  // 2
+    ( -$xsb  $Hs  0       )  // 3
+
+    ( -$xmin  0  0     )  // 4
+    ( $xmin  0  0     )  // 5
+    ( $xmin  $ycd  0     )  // 6
+    ( -$xmin  $ycd  0     )  // 7
+
+    ( -$xsb  0  $Ws       )  // 8
+    ( $xsb  0  $Ws       )  // 9
+    ( $xsb  $Hs  $Ws       )  // 10
+    ( -$xsb  $Hs  $Ws      )  // 11
+
+    ( -$xmin  0  $Ws     )  // 12
+    ( $xmin  0  $Ws     )  // 13
+    ( $xmin  $ycd  $Ws     )  // 14
+    ( -$xmin  $ycd  $Ws     )  // 15
+
+    ( -$xsb  -$Hs  0       )  // 16
+    ( $xsb  -$Hs  0       )  // 17
+    ( $xmin  -$Hs  0       )  // 18
+    ( $xmin -$ymin  0       )  // 19
+    ( $xsb  -$ymin     0   )  // 20
+    ( -$xsb  -$ymin  0       )  // 21
+    ( -$xmin -$ymin  0       )  // 22
+    ( -$xmin  -$Hs     0   )  // 23
+
+    ( -$xsb  -$Hs  $Ws       )  // 24
+    ( $xsb  -$Hs  $Ws       )  // 25
+    ( $xmin  -$Hs  $Ws       )  // 26
+    ( $xmin -$ymin  $Ws       )  // 27
+    ( $xsb  -$ymin  $Ws   )  // 28
+    ( -$xsb  -$ymin  $Ws       )  // 29
+    ( -$xmin -$ymin  $Ws       )  // 30
+    ( -$xmin  -$Hs     $Ws   )  // 31
+
+    ( $xfl 0 0	) 	//32
+    ( $xfr 0 0 )	//33
+    ( $xfl -$Hs 0)	//34
+    ( $xfr -$Hs 0)	//35
+    ( $xfl -$ymin 0)	//36
+    ( $xfr -$ymin 0)	//37
+    ( $xfl $Hs 0)	//38
+    ( $xfr $Hs 0) 	//39
+    ( $xflt $ycd 0)	//40
+    ( $xfrt $ycd 0) 	//41	
+
+    ( $xfl 0 $Ws) 	//42
+    ( $xfr 0 $Ws )	//43
+    ( $xfl -$Hs $Ws)	//44
+    ( $xfr -$Hs $Ws)	//45
+    ( $xfl -$ymin $Ws)	//46
+    ( $xfr -$ymin $Ws)	//47
+    ( $xfl $Hs $Ws)	//48
+    ( $xfr $Hs $Ws) 	//49
+    ( $xflt $ycd $Ws)	//50
+    ( $xfrt $ycd $Ws) 	//51	
+
+
+
+);
+
+blocks
+(
+//    hex (0 1 2 3 8 9 10 11) seebeckcell ($Nxsb $Ny $Nz) simpleGrading (1 1 1) 		//A
+    hex (4 0 3 7 12 8 11 15) insulator ($No $Ny $Nz) simpleGrading (1 1 1)		//B	
+//    hex (3 2 6 7 11 10 14 15) conductor ($Nxsb $No $Nz) simpleGrading (1 1 1)		//C
+    hex (1 5 6 2 9 13 14 10) insulator ($No $Ny $Nz) simpleGrading (1 1 1)		//D
+    hex (17 18 5 1 25 26 13 9) insulator ($No $Ny $Nz) simpleGrading (1 1 1)		//E
+    hex (20 19 18 17 28 27 26 25) insulator ($No $Ny $Nz) simpleGrading (1 1 1)		//F
+//    hex (21 20 17 16 29 28 25 24) insulator ($Nxsb $Ny $Nz) simpleGrading (1 1 1)		//G
+    hex (22 21 16 23 30 29 24 31) insulator ($No $Ny $Nz) simpleGrading (1 1 1)		//H
+    hex (23 16 0 4 31 24 8 12) insulator ($No $Ny $Nz) simpleGrading (1 1 1)		//I
+
+    hex (0 32 38 3 8 42 48 11) seebeckcell ($Nd $Ny $Nz) simpleGrading (1 1 1) 		//A1
+    hex (32 33 39 38 42 43 49 48) seebeckcell ($Nf $Ny $Nz) simpleGrading (1 1 1) 	//A2
+    hex (33 1 2 39 43 9 10 49) seebeckcell ($Nd $Ny $Nz) simpleGrading (1 1 1) 		//A3
+
+    hex (21 36 34 16 29 46 44 24) insulator ($Nd $Ny $Nz) simpleGrading (1 1 1)		//G1
+    hex (36 37 35 34 46 47 45 44) insulator ($Nf $Ny $Nz) simpleGrading (1 1 1)		//G2
+    hex (37 20 17 35 47 28 25 45) insulator ($Nd $Ny $Nz) simpleGrading (1 1 1)		//G3
+ 
+    hex (3 38 40 7 11 48 50 15) conductor ($Nd $No $Nz) simpleGrading (1 1 1)		//C1
+    hex (38 39 41 40 48 49 51 50) conductor ($Nf $No $Nz) simpleGrading (1 1 1)		//C2
+    hex (39 2 6 41 49 10 14 51) conductor ($Nd $No $Nz) simpleGrading (1 1 1)		//C3
+
+    hex (34 35 33 32 44 45 43 42) dissipador ($Nf $Ny $Nz) simpleGrading (1 1 1) 	//J1
+
+);
+
+edges ();
+
+boundary
+(
+
+    TOP
+    {
+        type wall;
+        faces (
+	(7 40 50 15)
+ 	(40 41 51 50)
+ 	(41 6 14 51)
+	      );     
+    }
+
+    WATER
+    {
+        type wall;
+        faces (
+		(1 17 25 9)
+		(0 16 24 8)
+		(0 32 42 8)
+		(33 1 9 43)
+		(16 34 44 24)
+		(35 17 25 45)
+		(32 34 44 42)
+		(33 43 45 35)
+	      );     
+    }
+
+    AIR
+    {
+	type wall;
+	faces (
+		(5 6 14 13)
+		(4 7 15 12)
+		(5 18 26 13)
+		(18 19 27 26)
+		(20 19 27 28)
+		(22 21 29 30)
+		(22 23 31 30)
+		(23 4 12 31)
+		(21 36 46 29)
+		(36 37 47 46)
+		(37 20 28 47)
+	     );
+    }
+    FRONT_BACK
+    {
+        type empty;
+        faces
+        (
+            // B
+            (4 0 3 7)
+            (12 8 11 15)
+
+            // D
+            (1 5 6 2)
+            (9 13 14 10)
+
+            // E
+            (17 18 5 1)
+            (25 26 13 9)
+
+            // F
+            (20 19 18 17)
+            (28 27 26 25)
+
+            // H
+            (22 21 16 23)
+            (30 29 24 31)
+
+            // I
+            (23 16 0 4)
+            (31 24 8 12)
+
+            // A1
+            (0 32 38 3)
+            (8 42 48 11)
+
+            // A2
+            (32 33 39 38)
+            (42 43 49 48)
+
+            // A3
+            (33 1 2 39)
+            (43 9 10 49)
+
+            // G1
+            (21 36 34 16)
+            (29 46 44 24)
+
+            // G2
+            (36 37 35 34)
+            (46 47 45 44)
+
+            // G3
+            (37 20 17 35)
+            (47 28 25 45)
+
+            // C1
+            (3 38 40 7)
+            (11 48 50 15)
+
+            // C2
+            (38 39 41 40)
+            (48 49 51 50)
+
+            // C3
+            (39 2 6 41)
+            (49 10 14 51)
+
+            // J1 (fin)
+            (34 35 33 32)
+            (44 45 43 42)
+        );
+    }
+);
+
+mergePatchPairs ();
+
