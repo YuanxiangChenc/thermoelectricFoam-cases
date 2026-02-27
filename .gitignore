@@ -19,3 +19,4 @@ log*
 *.swo
 .DS_Store
 .vscode/
+constant/polyMesh/
