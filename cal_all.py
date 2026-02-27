@@ -100,7 +100,7 @@ results["Q.electric"]["ratio"] = safe_pct(
 )
 
 # --- Print Table ---
-header = f"{'BC':<15} | {'q [W/m^2]':>12} | {'Q\' [W/m]':>12} | {'ratio [%]':>10}"
+header = "{:<15} | {:>12} | {:>12} | {:>10}".format("Bc", "q [W/m2]", "Q'[W/m]", "ratio [%]")
 print(header)
 print("-" * len(header))
 
