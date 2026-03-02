@@ -35,19 +35,19 @@ materials
     insulator
     {
         type solid;
-        k 0.5;
+        k 0.04;
     }
 
     conductor
     {
         type solid;
-        k 400;
+        k 240;
     }
 
     dissipador
     {
         type solid;
-        k 400;
+        k 240;
     }
 
 

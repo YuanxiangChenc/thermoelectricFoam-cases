@@ -35,7 +35,7 @@ boundaryField
 
     code
     #{
-        const scalar q0 = -50000.0; // W/m2
+        const scalar q0 = -20000.0; // W/m2
 
         const fvPatch& patch = this->patch();
 

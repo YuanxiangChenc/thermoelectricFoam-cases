@@ -18,7 +18,7 @@ libs            ("libsampling.so");
 interpolationScheme cellPoint;  
 setFormat       raw;        
 
-fields          (T k gradT gradTx gradTy gradTz q );
+fields          (T k gradT gradTx gradTy gradTz q alpha);
 // fields	(kEff); 		can't sample surface scalarFieldimport numpy as np
 sets
 (
@@ -47,8 +47,8 @@ sets
 	type 	uniform;
 	axis	distance;
 	
-	start       (-0.020065 0.0 0.02);		//first cell 0.0033535
-        end         (0.020065 0.0 0.02);
+	start       (-0.020065 0.0001765 0.02);		//first cell 0.0001765
+        end         (0.020065 0.0001765 0.02);
         nPoints     80;
     }
 

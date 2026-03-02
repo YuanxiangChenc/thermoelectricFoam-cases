@@ -1,0 +1,33 @@
+#!/bin/bash
+# ============================================
+# Allsample
+# Run patch and line sampling at latest time
+# ============================================
+
+echo "-----------------------------------------"
+echo "Running sample_patch at latestTime..."
+echo "-----------------------------------------"
+
+postProcess -func sample_patch -latestTime
+
+if [ $? -ne 0 ]; then
+    echo "Error in sample_patch. Aborting."
+    exit 1
+fi
+
+echo ""
+echo "-----------------------------------------"
+echo "Running sample (line/sets) at latestTime..."
+echo "-----------------------------------------"
+
+postProcess -func sample -latestTime
+
+if [ $? -ne 0 ]; then
+    echo "Error in sample."
+    exit 1
+fi
+
+echo ""
+echo "-----------------------------------------"
+echo "All sampling completed successfully."
+echo "-----------------------------------------"

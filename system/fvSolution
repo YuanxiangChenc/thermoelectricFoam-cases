@@ -32,7 +32,7 @@ SIMPLE
 
 thermoelectric
 {
-    nOuterCorrectors  500;      // max Picard iterations
+    nOuterCorrectors  200;      // max Picard iterations
     picardTolerance   1e-8;
 }
 
@@ -40,7 +40,7 @@ relaxationFactors
 {
     fields
     {
-        T 0.3;
+        T 0.5;
     }
 }
 

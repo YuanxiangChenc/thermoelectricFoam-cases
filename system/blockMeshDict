@@ -10,7 +10,7 @@ scale 1;
 Ls 0.04013;   // length  (x)
 Ws 1;   // width   (z)		// set to 1 in 2D , 0.04013 in 3D 
 Hs 0.00353;   // height  (y)
-pl 4;
+pl 5;
 hl 3;
 yl 2;
 
