@@ -231,7 +231,7 @@ results["Q.e"]["ratio"] = safe_pct(
     (results["seeb_top"]["Q"] - results["seeb_btm"]["Q"])
     if (results["seeb_top"]["Q"] is not None and results["seeb_btm"]["Q"] is not None)
     else None,
-    results["seeb_btm"]["Q"]
+    results["seeb_top"]["Q"]
 )
 # ---------------- Print table ----------------
 
