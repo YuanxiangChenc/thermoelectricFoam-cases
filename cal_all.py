@@ -233,40 +233,98 @@ results["Q.e"]["ratio"] = safe_pct(
     else None,
     results["seeb_top"]["Q"]
 )
-# ---------------- Print table ----------------
+# ---------------- Print tables ----------------
 
 def fmt_q_int(x):
-    """Format q_c and q_e as +/-xxxxxx (integer, no scientific)."""
+    """Format q values as signed integer."""
     if x is None:
         return ""
-    return f"{x:+.0f}"   # signed, 0 decimals
+    return f"{x:+.0f}"
 
-def fmt_net(x):
-    """Format net as +/-0.xxxxxx"""
+def fmt_Q(x, bc=None):
+    """Format Q' values."""
     if x is None:
         return ""
-    return f"{x:+.6f}"   # signed, 6 decimals fixed
+    if bc == "net":
+        return f"{x:+.6f}"
+    return f"{x:+.0f}"
 
-header = "{:<8} | {:>5} | {:>5} | {:>10} | {:>10} | {:>10} | {:>10} | {:>9}".format(
-    "BC", "Tm", "Tx", "q_c", "q_e", "q_n", "Q'", "ratio[%]"
-)
-print(header)
-print("-" * len(header))
+def fmt_ratio(x):
+    if x is None:
+        return ""
+    return f"{x:+.3g}"
 
-for bc in ORDER:
+def print_block_title(title):
+    print()
+    print("=" * 72)
+    print(title)
+    print("=" * 72)
+
+
+# ============================================================
+# 1) SYSTEM BALANCE
+# first column: BCs + Q.e
+# columns: q_n and Q'
+# ============================================================
+print_block_title("SYSTEM BALANCE")
+
+header1 = "{:<12} | {:>10} | {:>10}".format("BC", "q_n", "Q'")
+print(header1)
+print("-" * len(header1))
+
+for bc in ["cond_top", "water", "air", "Q.e"]:
     r = results[bc]
-
-    Tm = fmt_T(r["T_mean"])
-    Tx = fmt_T(r["T_max"])
-
-    qc = fmt_q_int(r["q_c"])
-    qe = fmt_q_int(r["q_e"])
-
     qn = "" if r["q_n"] is None else f"{r['q_n']:+.0f}"
-    Q  = "" if r["Q"] is None else (
-        fmt_net(r["Q"]) if bc == "net" else f"{r['Q']:+.0f}"
-    )
+    Q  = fmt_Q(r["Q"], bc)
+    print(f"{bc:<12} | {qn:>10} | {Q:>10}")
 
-    rr = "" if r["ratio"] is None else f"{r['ratio']:+.3g}"
+# optional: keep net shown here too if you want
+# r = results["net"]
+# print(f"{'net':<12} | {'':>10} | {fmt_Q(r['Q'], 'net'):>10}")
 
-    print(f"{bc:<8} | {Tm:>5} | {Tx:>5} | {qc:>10} | {qe:>10} | {qn:>10} | {Q:>10} | {rr:>9}")
+
+# ============================================================
+# 2) SEEBECK
+# rows: hot side / cold side
+# columns: Tmax | q_cond | q_ele | q_n
+# ============================================================
+print_block_title("SEEBECK")
+
+header2 = "{:<12} | {:>8} | {:>10} | {:>10} | {:>10}".format(
+    "side", "Tmax", "q_cond", "q_ele", "q_n"
+)
+print(header2)
+print("-" * len(header2))
+
+side_map = {
+    "hot side": "seeb_top",
+    "cold side": "seeb_btm",
+}
+
+for side_name, key in side_map.items():
+    r = results[key]
+    Tmax = fmt_T(r["T_max"])
+    qcond = fmt_q_int(r["q_c"])
+    qele  = fmt_q_int(r["q_e"])
+    qn    = "" if r["q_n"] is None else f"{r['q_n']:+.0f}"
+    print(f"{side_name:<12} | {Tmax:>8} | {qcond:>10} | {qele:>10} | {qn:>10}")
+
+
+# ============================================================
+# 3) RATIOS
+# same 3 ratios as original code, but renamed
+# ============================================================
+print_block_title("RATIOS")
+
+header3 = "{:<28} | {:>10}".format("name", "value[%]")
+print(header3)
+print("-" * len(header3))
+
+ratio_rows = [
+    ("conductor heat flux ratio", results["seeb_top"]["ratio"]),
+    ("system heat flow ratio",    results["water"]["ratio"]),
+    ("seebeck efficiency",        results["Q.e"]["ratio"]),
+]
+
+for name, val in ratio_rows:
+    print(f"{name:<28} | {fmt_ratio(val):>10}")
