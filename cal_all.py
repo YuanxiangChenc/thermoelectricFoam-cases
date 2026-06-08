@@ -233,6 +233,7 @@ results["Q.e"]["ratio"] = safe_pct(
     else None,
     results["seeb_top"]["Q"]
 )
+
 # ---------------- Print tables ----------------
 
 def fmt_q_int(x):
@@ -254,6 +255,16 @@ def fmt_ratio(x):
         return ""
     return f"{x:+.3g}"
 
+def fmt_expr(num, den):
+    if num is None or den is None:
+        return ""
+    return f"{num:+.0f} / {den:+.0f}"
+
+def fmt_pct(num, den):
+    if num is None or den is None or abs(den) < 1e-30:
+        return ""
+    return f"{100.0 * num / den:+.3g}"
+
 def print_block_title(title):
     print()
     print("=" * 72)
@@ -263,8 +274,6 @@ def print_block_title(title):
 
 # ============================================================
 # 1) SYSTEM BALANCE
-# first column: BCs + Q.e
-# columns: q_n and Q'
 # ============================================================
 print_block_title("SYSTEM BALANCE")
 
@@ -278,15 +287,9 @@ for bc in ["cond_top", "water", "air", "Q.e"]:
     Q  = fmt_Q(r["Q"], bc)
     print(f"{bc:<12} | {qn:>10} | {Q:>10}")
 
-# optional: keep net shown here too if you want
-# r = results["net"]
-# print(f"{'net':<12} | {'':>10} | {fmt_Q(r['Q'], 'net'):>10}")
-
 
 # ============================================================
 # 2) SEEBECK
-# rows: hot side / cold side
-# columns: Tmax | q_cond | q_ele | q_n
 # ============================================================
 print_block_title("SEEBECK")
 
@@ -312,19 +315,59 @@ for side_name, key in side_map.items():
 
 # ============================================================
 # 3) RATIOS
-# same 3 ratios as original code, but renamed
 # ============================================================
 print_block_title("RATIOS")
 
-header3 = "{:<28} | {:>10}".format("name", "value[%]")
+Q_cond  = results["cond_top"]["Q"]
+Q_water = results["water"]["Q"]
+Q_air   = results["air"]["Q"]
+Qe      = results["Q.e"]["Q"]
+
+q_cond_top = results["cond_top"]["q_n"]
+q_seeb_cond = results["seeb_top"]["q_c"]
+q_seeb_net  = results["seeb_top"]["q_n"]
+
+# conductor heat flux ratio
+cond_num_wo = q_seeb_cond
+cond_den_wo = q_cond_top
+cond_num_w  = q_seeb_net
+cond_den_w  = q_cond_top
+
+# system heat flow ratio
+# without Q.e : (Q_water + Q_air) / Q_cond
+sys_num_wo = Q_water
+sys_den_wo = Q_cond
+
+# with Q.e : Q_water / (Q_cond + Q.e)
+sys_num_w = Q_water
+sys_den_w = (Q_cond or 0.0) + (Qe or 0.0)
+
+header3 = "{:<28} | {:>22} | {:>10} | {:>22} | {:>10}".format(
+    "value [%]", "without Q.e", "result", "with Q.e", "result"
+)
 print(header3)
 print("-" * len(header3))
 
-ratio_rows = [
-    ("conductor heat flux ratio", results["seeb_top"]["ratio"]),
-    ("system heat flow ratio",    results["water"]["ratio"]),
-    ("seebeck efficiency",        results["Q.e"]["ratio"]),
-]
+print(
+    f"{'conductor heat flux ratio':<28} | "
+    f"{fmt_expr(cond_num_wo, cond_den_wo):>22} | "
+    f"{fmt_pct(cond_num_wo, cond_den_wo):>10} | "
+    f"{fmt_expr(cond_num_w, cond_den_w):>22} | "
+    f"{fmt_pct(cond_num_w, cond_den_w):>10}"
+)
 
-for name, val in ratio_rows:
-    print(f"{name:<28} | {fmt_ratio(val):>10}")
+print(
+    f"{'system heat flow ratio':<28} | "
+    f"{fmt_expr(sys_num_wo, sys_den_wo):>22} | "
+    f"{fmt_pct(sys_num_wo, sys_den_wo):>10} | "
+    f"{fmt_expr(sys_num_w, sys_den_w):>22} | "
+    f"{fmt_pct(sys_num_w, sys_den_w):>10}"
+)
+
+print(
+    f"{'seebeck efficiency':<28} | "
+    f"{'':>22} | "
+    f"{'':>10} | "
+    f"{'':>22} | "
+    f"{fmt_ratio(results['Q.e']['ratio']):>10}"
+)

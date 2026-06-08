@@ -10,7 +10,7 @@ scale 1;
 Ls 0.04013;   // length  (x)
 Ws 1;   // width   (z)		// set to 1 in 2D , 0.04013 in 3D 
 Hs 0.00353;   // height  (y)
-pl 5;
+pl 4; 	// length ratio
 hl 3;
 yl 2;
 
@@ -20,11 +20,11 @@ ycd #calc "$Hs* $hl";
 ymin #calc "$Hs * $yl";
 
 
-Nxsb 80; 
-Nx 40;
-Ny 20;
+Nxsb 100; 
+Nx 160;
+Ny 50;
 Nz 1;
-No 80;
+No 100;
 
 
 vertices

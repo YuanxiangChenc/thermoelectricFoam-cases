@@ -73,7 +73,7 @@ boundaryField
 
     code
     #{
-        const scalar h    = 1e5;      // W/m2/K
+        const scalar h    = 5000;      // W/m2/K
         const scalar Tinf = 333;   // K
 
         // Access patch values

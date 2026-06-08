@@ -48,9 +48,30 @@ sets
 	axis	distance;
 	
 	start       (-0.020065 0.0001765 0.02);		//first cell 0.0001765
-        end         (0.020065 0.0001765 0.02);
+        end         (0.020065  0.0001765 0.02);
         nPoints     80;
     }
+    
+    leftSeebeck
+    {
+	type 	uniform;
+	axis	distance;
+	
+	start       (-0.020065 0.0001765 0.02);		//first cell 0.0001765
+        end         (-0.020065 0.0033535 0.02);
+        nPoints     80;
+    }
+
+    rightSeebeck
+    {
+	type 	uniform;
+	axis	distance;
+	
+	start       (0.020065 0.0001765 0.02);		//first cell 0.0001765
+        end         (0.020065 0.0033535 0.02);
+        nPoints     80;
+    }
+
 
 
 

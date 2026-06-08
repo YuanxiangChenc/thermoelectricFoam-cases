@@ -28,7 +28,7 @@ materials
         B1 3.88e-3; B2 3.33e-6;
         C1 1.76e-4; C2 3.36e-5;
 
-        j (0 1600 0);
+        j (0 1100 0);	// opt : 1600
 	dTLimit 120;  //limit phi(dT) 
     }
 
@@ -49,9 +49,6 @@ materials
         type solid;
         k 240;
     }
-
-
-
 }
 
 
