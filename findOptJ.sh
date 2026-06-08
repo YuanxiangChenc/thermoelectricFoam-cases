@@ -118,16 +118,23 @@ parse_output() {
         return 1
     fi
 
-    info "--- cal_all.py output ---"
+    info "--- cal_all.py raw output ---"
     echo "$raw" | while IFS= read -r line; do info "  $line"; done
     info "--- end ---"
 
-    # Extract: Tmax is the first decimal number on the "hot side" line
-    G_TMAX=$(echo "$raw" | awk '/hot side/  { for(i=1;i<=NF;i++) if($i~/^[0-9]+\.[0-9]+$/) {print $i; exit} }')
-    G_QSH=$( echo "$raw" | awk '/hot side/  { print $NF }')
-    G_QSC=$( echo "$raw" | awk '/cold side/ { print $NF }')
-    G_QE=$(  echo "$raw" | awk '/Q\.e/      { print $NF }')
-    G_ETA=$( echo "$raw" | awk '/seebeck efficiency/ { print $NF }')
+    # cal_all.py output format (from observed terminal output):
+    #
+    #   500   -95998   -92814   -208     <- J  qsh  qsc  Qe   (NF==4, J=0 has NF==3 no Qe)
+    #   result  3.32   486.1             <- "result"  eta  Tmax
+    #
+    # We use a single awk pass to grab all fields at once.
+
+    read G_QSH G_QSC G_QE G_ETA G_TMAX <<< \
+      $(echo "$raw" | awk '
+        $1~/^[0-9-]+$/ && NF>=3 { qsh=$2; qsc=$3; qe=(NF>=4 ? $4 : "0") }
+        /^result/               { eta=$2; tmax=$3 }
+        END { print qsh, qsc, qe, eta, tmax }
+      ')
 
     # Strip leading + signs
     G_ETA=${G_ETA#+};   G_TMAX=${G_TMAX#+}
@@ -160,8 +167,14 @@ init_results() {
 
 append_results() {
     local J=$1
+    # Write one row to the results file
     printf "%-9s  %-13s  %-13s  %-11s  %-8s  %-8s\n" \
-        "$J" "$G_QSH" "$G_QSC" "$G_QE" "$G_ETA" "$G_TMAX" | tee -a "$RESULTS"
+        "$J" "$G_QSH" "$G_QSC" "$G_QE" "$G_ETA" "$G_TMAX" >> "$RESULTS"
+    # Print a highlighted single-line summary to terminal
+    echo ""
+    printf "\033[1m  ROW | %-9s  %-13s  %-13s  %-11s  %-8s  %-8s\033[0m\n" \
+        "$J" "$G_QSH" "$G_QSC" "$G_QE" "$G_ETA" "$G_TMAX"
+    echo ""
 }
 
 # =============================================================================
@@ -235,7 +248,7 @@ done
 # =============================================================================
 sep
 _tee "\n${B}RESULTS:${N}"
-cat "$RESULTS" | tee -a "$LOG"
+echo ""; cat "$RESULTS"; echo "" | tee -a "$LOG"
 _tee "\n${B}SUMMARY${N}"
 ok  "Optimal J  = ${best_J} A/m2"
 ok  "Best eta   = ${best_eta} %"
